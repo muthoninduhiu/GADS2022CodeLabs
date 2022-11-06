@@ -27,6 +27,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.wordsapp.data.SettingsDataStore
 import com.example.wordsapp.databinding.FragmentLetterListBinding
 
 /**
@@ -61,6 +62,14 @@ class LetterListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         recyclerView = binding.recyclerView
+        // Initialize SettingsDataStore
+        SettingsDataStore = SettingsDataStore(requireContext())
+        SettingsDataStore.preferenceFlow.asLiveData().observe(viewLifecycleOwner, {
+            SettingsDataStore.preferenceFlow.asLiveData().observe(viewLifecycleOwner, { value ->
+                isLinearLayoutManager = value
+                chooseLayout()
+            })
+        })
         // Sets the LayoutManager of the recyclerview
         // On the first run of the app, it will be LinearLayoutManager
         chooseLayout()
@@ -119,6 +128,9 @@ class LetterListFragment : Fragment() {
                 setIcon(item)
 
                 return true
+            }
+            lifecycleScope.launch {
+                SettingsDataStore.saveLayoutToPreferencesStore(isLinearLayoutManager, requireContext())
             }
             // Otherwise, do nothing and use the core event handling
 
